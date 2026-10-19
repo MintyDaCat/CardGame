@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Poker practice vs neural net</title>
+<style>
+:root{--bg:#f3f1ec;--fg:#1d2420;--muted:#66706a;--panel:#fff;--line:#d9d6cd;--felt:#14513f;--felt2:#0d3a2d;--gold:#e2b64a;--card:#fbfaf5;--red:#c2342b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121715;--fg:#e8ece9;--muted:#93a099;--panel:#1b221f;--line:#2e3833;--felt:#14513f;--felt2:#0a2b22}}
+:root[data-theme="dark"]{--bg:#121715;--fg:#e8ece9;--muted:#93a099;--panel:#1b221f;--line:#2e3833}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 Georgia,"Times New Roman",serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:.2em 0 .1em;letter-spacing:.2px}
+.sub{color:var(--muted);margin:0 0 12px;font-size:.95rem}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-family:system-ui,sans-serif;font-size:.9rem}
+select,button,input{font:inherit;font-family:system-ui,sans-serif}
+select,input{background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+button{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;padding:9px 16px;cursor:pointer;min-height:42px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+button:disabled{opacity:.4;cursor:default}
+button.go{background:var(--gold);color:#1d1a0e;border-color:var(--gold);font-weight:600}
+#total{margin-left:auto}
+.table{background:radial-gradient(ellipse at center,var(--felt),var(--felt2));border-radius:90px/60px;border:8px solid #3a2a1a;padding:18px 12px;color:#f1f4ef;min-height:330px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;font-family:system-ui,sans-serif}
+.seat{text-align:center}
+.who{font-size:.85rem;opacity:.9}
+.cards{display:flex;gap:6px;justify-content:center;min-height:62px;margin:4px 0;flex-wrap:wrap}
+.card{width:44px;height:62px;border-radius:6px;background:var(--card);color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 19px/1 Georgia,serif;box-shadow:0 2px 4px #0006}
+.card.r{color:var(--red)}.card small{font-size:17px}
+.card.back{background:repeating-linear-gradient(45deg,#7a2430,#7a2430 4px,#5e1a24 4px,#5e1a24 8px);border:3px solid var(--card)}
+.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.pot{background:#0006;border-radius:20px;padding:3px 14px;font-size:.95rem}
+.bet{font-size:.8rem;color:var(--gold);min-height:1.2em}
+.acts{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.acts button{flex:1;min-width:100px}
+#log{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;height:170px;overflow:auto;font:14px/1.5 system-ui,sans-serif}
+#log div{padding:1px 0}#log .h{color:var(--muted);margin-top:6px}
+details{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:system-ui,sans-serif;font-size:.92rem}
+summary{cursor:pointer;font-weight:600}
+progress{width:100%;height:10px;margin-top:8px}
+@media (max-width:520px){.table{border-radius:50px/40px}.card{width:38px;height:54px;font-size:17px}}
+</style></head>
+<body><main>
+<h1>Poker practice</h1>
+<p class="sub">Heads-up Texas Hold’em against a bot. Play chips only, and stacks reset to 1000 each hand.</p>
+<div class="bar">
+  <label>Opponent <select id="opp"><option value="net">Neural network</option><option value="tight">Tight bot</option><option value="loose">Loose bot</option><option value="aggro">Aggressive bot</option></select></label>
+  <button class="go" id="next">Deal</button>
+  <span id="total">Session: 0 chips</span>
+</div>
+<div class="table">
+  <div class="seat"><div class="who" id="oname">Bot</div><div class="cards" id="ocards"></div><div class="bet" id="obet"></div></div>
+  <div class="mid"><div class="cards" id="board"></div><div class="pot" id="pot">Pot 0</div></div>
+  <div class="seat"><div class="bet" id="ybet"></div><div class="cards" id="ycards"></div><div class="who" id="yname">You</div></div>
+</div>
+<div class="acts"><button id="bf" disabled>Fold</button><button id="bc" disabled>Check</button><button id="br" disabled>Raise</button></div>
+<div id="log" aria-live="polite"></div>
+<details><summary>Train the neural network</summary>
+  <p>The network starts by copying the rule bots, then improves by playing thousands of hands (self-play and against the bots). It runs in your browser and the result is saved on this device.</p>
+  <div class="bar"><label>Hands <input id="nh" type="number" value="20000" min="1000" step="1000" style="width:100px"></label>
+  <button id="tr">Train</button><button id="st" disabled>Stop</button><button id="rs">Reset network</button></div>
+  <progress id="pg" value="0" max="1"></progress><div id="ts" class="sub"></div>
+</details>
+</main>
+<script>
+//ENGINE_START
+const START=1000,SB=5,BB=10,FOLD=0,CALL=1,RAISE=2,SUITS="♠♥♦♣",RANKS="23456789TJQKA";
+const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)],gauss=()=>Math.sqrt(-2*Math.log(1-Math.random()))*Math.cos(6.2832*Math.random());
+const cardStr=c=>RANKS[c%13]+SUITS[c/13|0];
+const pack=(cat,a=0,b=0,c=0,d=0,e=0)=>((((cat*13+a)*13+b)*13+c)*13+d)*13+e;
+const stTop=m=>{for(let t=12;t>=4;t--)if((m>>(t-4)&31)==31)return t;return(m&0x100F)==0x100F?3:-1};
+function best7(c){const cnt=new Int8Array(13),sm=[0,0,0,0],sc=[0,0,0,0];let all=0;
+ for(let i=0;i<7;i++){const r=c[i]%13,s=(c[i]/13)|0;cnt[r]++;sm[s]|=1<<r;sc[s]++;all|=1<<r}
+ let fs=-1;for(let s=0;s<4;s++)if(sc[s]>=5)fs=s;
+ if(fs>=0){const t=stTop(sm[fs]);if(t>=0)return pack(8,t);const f=[];for(let r=12;r>=0&&f.length<5;r--)if(sm[fs]>>r&1)f.push(r);return pack(5,...f)}
+ let q=-1;const t3=[],p=[],s1=[];
+ for(let r=12;r>=0;r--){const n=cnt[r];if(n==4)q=r;else if(n==3)t3.push(r);else if(n==2)p.push(r);else if(n==1)s1.push(r)}
+ const top=(...ex)=>{for(let r=12;r>=0;r--)if(cnt[r]>0&&!ex.includes(r))return r;return 0};
+ if(q>=0)return pack(7,q,top(q));
+ if(t3.length&&(t3.length>1||p.length))return pack(6,t3[0],Math.max(t3.length>1?t3[1]:-1,p.length?p[0]:-1));
+ const t=stTop(all);if(t>=0)return pack(4,t);
+ if(t3.length)return pack(3,t3[0],s1[0],s1[1]);
+ if(p.length>=2)return pack(2,p[0],p[1],top(p[0],p[1]));
+ if(p.length==1)return pack(1,p[0],s1[0],s1[1],s1[2]);
+ return pack(0,s1[0],s1[1],s1[2],s1[3],s1[4])}
+function equity(hole,board,nb,sims){const used=new Array(52).fill(false);used[hole[0]]=used[hole[1]]=true;
+ for(let i=0;i<nb;i++)used[board[i]]=true;const rem=[];for(let c=0;c<52;c++)if(!used[c])rem.push(c);
+ const need=5-nb+2;let w=0;
+ for(let s=0;s<sims;s++){for(let i=0;i<need;i++){const j=i+rnd(rem.length-i);[rem[i],rem[j]]=[rem[j],rem[i]]}
+  const my=[hole[0],hole[1]],op=[rem[0],rem[1]];
+  for(let i=0;i<5;i++){const c=i<nb?board[i]:rem[2+i-nb];my.push(c);op.push(c)}
+  const a=best7(my),b=best7(op);w+=a>b?1:a==b?.5:0}
+ return w/sims}
+
+class RuleBot{constructor(t,m,b){this.t=t;this.m=m;this.b=b}
+ static of(s){return s=="tight"?new RuleBot(.70,.08,.02):s=="loose"?new RuleBot(.68,-.08,.05):new RuleBot(.58,0,.15)}
+ act(o){const e=o.equity(60),odds=o.toCall/(o.pot+o.toCall);
+  if(o.canRaise&&(e>this.t||Math.random()<this.b*(o.toCall==0?1:.3)))return RAISE;
+  if(o.toCall==0)return CALL;return e>odds+this.m?CALL:FOLD}}
+
+const IN=11,H=16,O=3,zeros=n=>new Array(n).fill(0);
+class Net{constructor(w){this.w1=zeros(H*IN).map(()=>gauss()*.3);this.b1=zeros(H);this.w2=zeros(O*H).map(()=>gauss()*.3);this.b2=zeros(O);
+  if(w)[this.w1,this.b1,this.w2,this.b2]=w;this.clr()}
+ clr(){this.g1=zeros(H*IN);this.gb1=zeros(H);this.g2=zeros(O*H);this.gb2=zeros(O)}
+ fwd(x,legal){const h=new Array(H),z=new Array(O),p=zeros(O);
+  for(let j=0;j<H;j++){let s=this.b1[j];for(let k=0;k<IN;k++)s+=this.w1[j*IN+k]*x[k];h[j]=Math.tanh(s)}
+  let mx=-1e9,sum=0;
+  for(let i=0;i<O;i++){let s=this.b2[i];for(let j=0;j<H;j++)s+=this.w2[i*H+j]*h[j];z[i]=s;if(legal[i])mx=Math.max(mx,s)}
+  for(let i=0;i<O;i++)if(legal[i]){p[i]=Math.exp(z[i]-mx);sum+=p[i]}
+  for(let i=0;i<O;i++)p[i]/=sum;return{h,p}}
+ acc(x,legal,a,adv,beta){const{h,p}=this.fwd(x,legal);let ent=0;
+  for(const q of p)if(q>1e-9)ent-=q*Math.log(q);
+  const dl=zeros(O),dh=zeros(H);
+  for(let i=0;i<O;i++){if(!legal[i])continue;dl[i]=((i==a?1:0)-p[i])*adv;if(p[i]>1e-9)dl[i]+=beta*p[i]*(-Math.log(p[i])-ent)}
+  for(let i=0;i<O;i++){this.gb2[i]+=dl[i];for(let j=0;j<H;j++){this.g2[i*H+j]+=dl[i]*h[j];dh[j]+=dl[i]*this.w2[i*H+j]}}
+  for(let j=0;j<H;j++){const d=dh[j]*(1-h[j]*h[j]);this.gb1[j]+=d;for(let k=0;k<IN;k++)this.g1[j*IN+k]+=d*x[k]}}
+ apply(lr,n){const s=lr/n,up=(w,g)=>{for(let i=0;i<w.length;i++)w[i]+=s*g[i]};
+  up(this.w1,this.g1);up(this.b1,this.gb1);up(this.w2,this.g2);up(this.b2,this.gb2);this.clr()}
+ dump(){return[this.w1,this.b1,this.w2,this.b2]}}
+
+class NetAgent{constructor(net,sims,training){this.net=net;this.sims=sims;this.tr=training;this.xs=[];this.ls=[];this.as=[]}
+ act(o){const x=zeros(IN);x[0]=o.equity(this.sims);x[1]=o.toCall/(o.pot+o.toCall+1e-9);x[2]=o.pot/2/START;
+  x[3]=o.stack/START;x[4]=o.oppStack/START;x[5+o.street]=1;x[9]=o.isButton?1:0;x[10]=o.raises/4;
+  const legal=[o.toCall>0,true,o.canRaise],{p}=this.net.fwd(x,legal);let r=Math.random(),acc=0,a=CALL;
+  for(let i=0;i<3;i++){acc+=p[i];if(legal[i]&&r<acc){a=i;break}}
+  if(this.tr){this.xs.push(x);this.ls.push(legal);this.as.push(a)}return a}
+ imitate(acts){this.xs.forEach((x,i)=>this.net.acc(x,this.ls[i],acts[i],1,0));this.xs=[];this.ls=[];this.as=[]}
+ finish(adv){this.xs.forEach((x,i)=>this.net.acc(x,this.ls[i],this.as[i],adv,.02));this.xs=[];this.ls=[];this.as=[]}}
+class Teacher{constructor(bot,rec){this.bot=bot;this.rec=rec;this.acts=[]}
+ act(o){this.rec.act(o);const a=this.bot.act(o);this.acts.push(a);return a}}
+
+class Game{constructor(a,b,ui){this.ag=[a,b];this.ui=ui||null;this.names=["You","Bot"];this.reveal=false}
+ log(s,cls){this.ui&&this.ui.log(s,cls)}
+ upd(){this.ui&&this.ui.render(this)}
+ post(p,a){a=Math.min(a,this.stack[p]);this.stack[p]-=a;this.bet[p]+=a}
+ async play(button){
+  const d=[...Array(52).keys()];for(let i=51;i>0;i--){const j=rnd(i+1);[d[i],d[j]]=[d[j],d[i]]}
+  this.hole=[[d[0],d[1]],[d[2],d[3]]];this.board=d.slice(4,9);this.nBoard=0;this.pot=0;this.reveal=false;
+  this.stack=[START,START];this.bet=[0,0];this.button=button;
+  const sb=button,bb=1-button;this.post(sb,SB);this.post(bb,BB);
+  this.log(`${this.names[sb]} posts the small blind (${SB}), ${this.names[bb]} the big blind (${BB})`);this.upd();
+  let folder=-1;
+  for(let st=0;st<4&&folder<0;st++){
+   if(st>0){this.pot+=this.bet[0]+this.bet[1];this.bet=[0,0];this.nBoard=st==1?3:st+2;
+    this.log(`${["","Flop","Turn","River"][st]}: ${this.board.slice(0,this.nBoard).map(cardStr).join(" ")}`,"h");this.upd()}
+   folder=await this.betting(st,st==0?sb:bb,button)}
+  this.pot+=this.bet[0]+this.bet[1];this.bet=[0,0];
+  if(folder>=0){this.stack[1-folder]+=this.pot;this.log(`${this.names[folder]} folds. ${this.names[1-folder]} wins ${this.pot}.`)}
+  else{this.nBoard=5;this.reveal=true;const sv=p=>[...this.hole[p],...this.board],a=best7(sv(0)),b=best7(sv(1));
+   this.log(`Showdown: ${this.names[0]} ${this.hole[0].map(cardStr).join(" ")}, ${this.names[1]} ${this.hole[1].map(cardStr).join(" ")}`,"h");
+   if(a>b){this.stack[0]+=this.pot;this.log(`${this.names[0]} win${this.names[0]=="You"?"":"s"} ${this.pot}.`)}
+   else if(b>a){this.stack[1]+=this.pot;this.log(`${this.names[1]} wins ${this.pot}.`)}
+   else{this.stack[0]+=this.pot>>1;this.stack[1]+=this.pot-(this.pot>>1);this.log("Split pot.")}}
+  this.reveal=true;this.pot=0;this.upd();
+  return[this.stack[0]-START,this.stack[1]-START]}
+ async betting(street,first,button){let p=first,toAct=2,raises=0;
+  while(toAct>0){const o=1-p,s=this.stack,b=this.bet;
+   if(s[p]>0&&!(s[o]==0&&b[p]>=b[o])){
+    const maxBet=Math.max(b[0],b[1]),toCall=Math.min(maxBet-b[p],s[p]),potNow=this.pot+b[0]+b[1];
+    let raiseTo=maxBet+Math.max(BB,Math.floor((potNow+toCall)*3/4));raiseTo=Math.min(raiseTo,b[p]+s[p],b[o]+s[o]);
+    const ob={hole:this.hole[p],board:this.board,nBoard:this.nBoard,street,pot:potNow,toCall,stack:s[p],oppStack:s[o],raises,raiseTo,isButton:p==button,canRaise:raises<4&&s[o]>0&&raiseTo>maxBet};
+    ob.equity=n=>equity(ob.hole,ob.board,ob.nBoard,n);
+    this.upd();if(this.ui&&!this.ag[p].human)await new Promise(r=>setTimeout(r,750));
+    let a=await this.ag[p].act(ob);
+    if(a==RAISE&&!ob.canRaise)a=CALL;if(a==FOLD&&toCall==0)a=CALL;
+    if(a==FOLD){this.log(`${this.names[p]} folds`);return p}
+    if(a==CALL){this.post(p,toCall);this.log(`${this.names[p]} ${toCall?"calls "+toCall:"checks"}`);toAct--}
+    else{this.post(p,raiseTo-b[p]);raises++;this.log(`${this.names[p]} raises to ${raiseTo}${s[p]==0?" (all-in)":""}`);toAct=1}
+   }else toAct--;
+   p=o}
+  return-1}}
+
+const bots=["tight","loose","aggro"].map(RuleBot.of);
+async function train(net,hands,prog,stop){
+ const tick=()=>new Promise(r=>setTimeout(r)),warm=Math.min(hands>>2,8000);let base=0,vs=0,vc=0;
+ for(let h=1;h<=warm&&!stop();h++){const rec=new NetAgent(net,40,true),t=new Teacher(pick(bots),rec),opp=pick(bots);
+  await(h%2?new Game(opp,t):new Game(t,opp)).play(h%2);rec.imitate(t.acts);if(h%32==0)net.apply(.05,32);
+  if(h%100==0){prog(h/(warm+hands),"Warm-up: copying rule bots");await tick()}}
+ for(let h=1;h<=hands&&!stop();h++){const a=new NetAgent(net,40,true),self=Math.random()<.25,seat=rnd(2);
+  const b=self?new NetAgent(net,40,true):pick(bots),g=seat==0?new Game(a,b):new Game(b,a),res=await g.play(h%2);
+  const cl=v=>Math.max(-5,Math.min(5,v/100)),r=cl(res[seat]);a.finish(r-base);
+  if(self)b.finish(cl(res[1-seat])-base);else{vs+=res[seat]/BB;vc++}
+  base=.99*base+.01*r;if(h%64==0)net.apply(.003,64);
+  if(h%200==0){prog((warm+h)/(warm+hands),`Hand ${h} of ${hands}. Result against rule bots: ${(vs/Math.max(1,vc)).toFixed(2)} big blinds per hand`);vs=vc=0;await tick()}}}
+//ENGINE_END
+
+const PRE=null;
+const $=id=>document.getElementById(id);
+let net=null,total=0,handNo=0,busy=false,pending=null,stopFlag=false,training=false;
+try{const w=JSON.parse(localStorage.getItem("pokernet")||"null");if(w)net=new Net(w)}catch(e){}
+if(!net&&PRE)net=new Net(PRE);
+const cardEl=(c,back)=>{const d=document.createElement("div");
+ if(back){d.className="card back";return d}
+ d.className="card"+((c/13|0)==1||(c/13|0)==2?" r":"");d.innerHTML=`<span>${RANKS[c%13]=="T"?"10":RANKS[c%13]}</span><small>${SUITS[c/13|0]}</small>`;return d};
+const fill=(id,arr)=>{const e=$(id);e.replaceChildren(...arr)};
+const ui={log(s,c){const d=document.createElement("div");d.textContent=s;if(c)d.className=c;$("log").appendChild(d);$("log").scrollTop=1e6},
+ render(g){fill("ycards",g.hole[0].map(c=>cardEl(c)));
+  fill("ocards",g.hole[1].map(c=>cardEl(c,!g.reveal)));
+  fill("board",g.board.slice(0,g.nBoard).map(c=>cardEl(c)));
+  $("pot").textContent="Pot "+(g.pot+g.bet[0]+g.bet[1]);
+  $("ybet").textContent=g.bet[0]?"Bet "+g.bet[0]:"";$("obet").textContent=g.bet[1]?"Bet "+g.bet[1]:"";
+  $("yname").textContent=`You, stack ${g.stack[0]}${g.button==0?" (dealer)":""}`;$("oname").textContent=`${g.names[1]}, stack ${g.stack[1]}${g.button==1?" (dealer)":""}`}};
+const human={human:true,act(o){return new Promise(res=>{pending=res;
+  $("bf").disabled=o.toCall==0;$("bc").disabled=false;$("bc").textContent=o.toCall?"Call "+o.toCall:"Check";
+  $("br").disabled=!o.canRaise;$("br").textContent=o.canRaise?"Raise to "+o.raiseTo:"Raise"})}};
+const choose=a=>{if(!pending)return;const r=pending;pending=null;["bf","bc","br"].forEach(i=>$(i).disabled=true);r(a)};
+$("bf").onclick=()=>choose(FOLD);$("bc").onclick=()=>choose(CALL);$("br").onclick=()=>choose(RAISE);
+function makeBot(){const v=$("opp").value;if(v=="net")return net?new NetAgent(net,150,false):null;return RuleBot.of(v)}
+$("next").onclick=async()=>{if(busy||training)return;const bot=makeBot();
+ if(!bot){ui.log("No trained network yet. Open “Train the neural network” below, or pick a rule bot.");return}
+ busy=true;$("next").disabled=true;handNo++;$("log").textContent="";ui.log(`Hand ${handNo}`,"h");
+ const g=new Game(human,bot,ui);g.names=["You",$("opp").selectedOptions[0].text];
+ const res=await g.play(handNo%2);total+=res[0];
+ ui.log(`Result: ${res[0]>=0?"+":""}${res[0]} chips`,"h");
+ $("total").textContent=`Session: ${total>=0?"+":""}${total} chips (${(total/BB).toFixed(1)} big blinds)`;
+ busy=false;$("next").disabled=false;$("next").textContent="Deal next hand"};
+$("tr").onclick=async()=>{if(training||busy)return;training=true;stopFlag=false;$("tr").disabled=true;$("st").disabled=false;
+ if(!net)net=new Net();
+ await train(net,Math.max(1000,+$("nh").value||20000),(p,t)=>{$("pg").value=p;$("ts").textContent=t},()=>stopFlag);
+ try{localStorage.setItem("pokernet",JSON.stringify(net.dump()))}catch(e){}
+ $("ts").textContent="Done. The network is saved on this device.";training=false;$("tr").disabled=false;$("st").disabled=true};
+$("st").onclick=()=>{stopFlag=true};
+$("rs").onclick=()=>{if(training)return;net=PRE?new Net(PRE):null;try{localStorage.removeItem("pokernet")}catch(e){}$("ts").textContent="Network reset."};
+if(!net)$("log").textContent="Pick a rule bot and press Deal, or train the neural network first.";
+</script></body></html>
