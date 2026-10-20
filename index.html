@@ -20,16 +20,31 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 button:disabled{opacity:.4;cursor:default}
 button.go{background:var(--gold);color:#1d1a0e;border-color:var(--gold);font-weight:600}
 #total{margin-left:auto}
-.table{background:radial-gradient(ellipse at center,var(--felt),var(--felt2));border-radius:90px/60px;border:8px solid #3a2a1a;padding:18px 12px;color:#f1f4ef;min-height:330px;display:grid;grid-template-rows:auto 1fr auto;gap:10px;font-family:system-ui,sans-serif}
-.seat{text-align:center}
-.who{font-size:.85rem;opacity:.9}
-.cards{display:flex;gap:6px;justify-content:center;min-height:62px;margin:4px 0;flex-wrap:wrap}
-.card{width:44px;height:62px;border-radius:6px;background:var(--card);color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 19px/1 Georgia,serif;box-shadow:0 2px 4px #0006}
-.card.r{color:var(--red)}.card small{font-size:17px}
-.card.back{background:repeating-linear-gradient(45deg,#7a2430,#7a2430 4px,#5e1a24 4px,#5e1a24 8px);border:3px solid var(--card)}
-.mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-.pot{background:#0006;border-radius:20px;padding:3px 14px;font-size:.95rem}
-.bet{font-size:.8rem;color:var(--gold);min-height:1.2em}
+.table{position:relative;height:520px;background:radial-gradient(ellipse at center,var(--felt),var(--felt2));border-radius:50%;border:9px solid #3a2a1a;color:#f1f4ef;font-family:system-ui,sans-serif;margin:18px 6px}
+.seat{position:absolute;transform:translate(-50%,-50%);text-align:center;min-width:76px;font-size:12px;line-height:1.3}
+.seat.fold{opacity:.45}
+.seat.act .nm{outline:2px solid var(--gold);outline-offset:3px}
+.nm{background:#0008;border-radius:10px;padding:1px 8px;display:inline-block;max-width:120px}
+.sk{color:var(--gold);font-weight:600}.lt{min-height:1.3em;opacity:.9}
+.dl{display:inline-block;background:#fff;color:#222;border-radius:50%;width:16px;height:16px;line-height:16px;margin-left:5px;font-size:10px}
+.cards{display:flex;gap:4px;justify-content:center;min-height:42px;margin-bottom:3px}
+.card{border-radius:5px;background:var(--card);color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:700;line-height:1;box-shadow:0 2px 4px #0006}
+.card.md{width:44px;height:62px;font-size:19px}.card.sm{width:30px;height:42px;font-size:13px}
+.card.r{color:var(--red)}.card.back{background:repeating-linear-gradient(45deg,#7a2430,#7a2430 4px,#5e1a24 4px,#5e1a24 8px);border:3px solid var(--card)}
+.bd{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);display:flex;gap:5px}
+.pt,.bt{position:absolute;transform:translate(-50%,-50%);display:flex;gap:4px;align-items:flex-end}
+.pt{left:50%;top:58%}.bt{font-size:12px;color:var(--gold)}
+.pt span,.bt span{background:#0007;border-radius:12px;padding:1px 9px;align-self:center;color:#f1f4ef}.bt span{color:var(--gold)}
+.stk{display:flex;flex-direction:column-reverse}
+.chip{display:block;width:28px;height:10px;border-radius:5px;background:repeating-linear-gradient(90deg,var(--c) 0 6px,#f4f1e6 6px 9px);box-shadow:0 1px 0 #000a,inset 0 1px 0 #fff5}
+.chip+.chip{margin-bottom:-6px}
+@keyframes drop{from{transform:translateY(-16px);opacity:0}to{transform:none;opacity:1}}
+.pop .stk{animation:drop .3s ease-out}
+.tw{overflow-x:auto;padding:8px 0}
+.tiny .card.sm{width:22px;height:30px;font-size:10px}.tiny .cards{min-height:30px}.tiny .seat{min-width:54px;font-size:10px}.tiny .nm{max-width:80px}.tiny .lt{font-size:9px}
+.mine{display:flex;align-items:flex-end;gap:8px;font:.9rem system-ui,sans-serif;min-height:32px;margin:6px 0 0}.mine span{color:var(--muted);align-self:center}
+.hint{color:var(--muted);font:.8rem system-ui,sans-serif;margin:0 0 8px}
+@media (prefers-reduced-motion:reduce){.pop .stk{animation:none}}
 .acts{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
 .acts button{flex:1;min-width:100px}
 #log{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;height:170px;overflow:auto;font:14px/1.5 system-ui,sans-serif}
@@ -37,25 +52,24 @@ button.go{background:var(--gold);color:#1d1a0e;border-color:var(--gold);font-wei
 details{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-family:system-ui,sans-serif;font-size:.92rem}
 summary{cursor:pointer;font-weight:600}
 progress{width:100%;height:10px;margin-top:8px}
-@media (max-width:520px){.table{border-radius:50px/40px}.card{width:38px;height:54px;font-size:17px}}
+@media (max-width:520px){.table{height:580px;margin:14px 0;border-width:6px}.card.md{width:38px;height:54px;font-size:16px}.seat{min-width:62px;font-size:11px}.nm{max-width:84px}}
 </style></head>
 <body><main>
 <h1>Poker practice</h1>
-<p class="sub">Heads-up Texas Hold’em against a bot. Play chips only, and stacks reset to 1000 each hand.</p>
+<p class="sub">Texas Hold’em against bots. Play chips only: everyone starts with 1000 and your stack carries over.</p>
 <div class="bar">
-  <label>Opponent <select id="opp"><option value="net">Neural network</option><option value="tight">Tight bot</option><option value="loose">Loose bot</option><option value="aggro">Aggressive bot</option></select></label>
-  <button class="go" id="next">Deal</button>
-  <span id="total">Session: 0 chips</span>
+  <label>Players (you + bots) <input id="np" type="number" min="2" max="23" value="4" style="width:70px"></label>
+  <label>Bot type <select id="bt"><option value="mix">Mixed</option><option value="net">Neural net</option><option value="tight">Tight</option><option value="loose">Loose</option><option value="aggro">Aggressive</option></select></label>
+  <button class="go" id="next">Deal</button><button id="restart">Restart</button>
+  <span id="total"></span>
 </div>
-<div class="table">
-  <div class="seat"><div class="who" id="oname">Bot</div><div class="cards" id="ocards"></div><div class="bet" id="obet"></div></div>
-  <div class="mid"><div class="cards" id="board"></div><div class="pot" id="pot">Pot 0</div></div>
-  <div class="seat"><div class="bet" id="ybet"></div><div class="cards" id="ycards"></div><div class="who" id="yname">You</div></div>
-</div>
+<p class="hint">2 to 23 players. Changing these settings restarts the game. Chips carry over from hand to hand; players who run out sit out.</p>
+<div class="tw"><div class="table" id="table"></div></div>
+<div class="mine" id="mine"></div>
 <div class="acts"><button id="bf" disabled>Fold</button><button id="bc" disabled>Check</button><button id="br" disabled>Raise</button></div>
 <div id="log" aria-live="polite"></div>
 <details><summary>Train the neural network</summary>
-  <p>The network starts by copying the rule bots, then improves by playing thousands of hands (self-play and against the bots). It runs in your browser and the result is saved on this device.</p>
+  <p>Training is heads-up (you versus one bot). In larger games the bots shrink their hand estimates to allow for extra opponents. The network starts by copying the rule bots, then improves by playing thousands of hands (self-play and against the bots). It runs in your browser and the result is saved on this device.</p>
   <div class="bar"><label>Hands <input id="nh" type="number" value="20000" min="1000" step="1000" style="width:100px"></label>
   <button id="tr">Train</button><button id="st" disabled>Stop</button><button id="rs">Reset network</button></div>
   <progress id="pg" value="0" max="1"></progress><div id="ts" class="sub"></div>
@@ -118,8 +132,8 @@ class Net{constructor(w){this.w1=zeros(H*IN).map(()=>gauss()*.3);this.b1=zeros(H
  dump(){return[this.w1,this.b1,this.w2,this.b2]}}
 
 class NetAgent{constructor(net,sims,training){this.net=net;this.sims=sims;this.tr=training;this.xs=[];this.ls=[];this.as=[]}
- act(o){const x=zeros(IN);x[0]=o.equity(this.sims);x[1]=o.toCall/(o.pot+o.toCall+1e-9);x[2]=o.pot/2/START;
-  x[3]=o.stack/START;x[4]=o.oppStack/START;x[5+o.street]=1;x[9]=o.isButton?1:0;x[10]=o.raises/4;
+ act(o){const x=zeros(IN);x[0]=o.equity(this.sims);x[1]=o.toCall/(o.pot+o.toCall+1e-9);x[2]=Math.min(3,o.pot/2/START);
+  x[3]=Math.min(3,o.stack/START);x[4]=Math.min(3,o.oppStack/START);x[5+o.street]=1;x[9]=o.isButton?1:0;x[10]=o.raises/4;
   const legal=[o.toCall>0,true,o.canRaise],{p}=this.net.fwd(x,legal);let r=Math.random(),acc=0,a=CALL;
   for(let i=0;i<3;i++){acc+=p[i];if(legal[i]&&r<acc){a=i;break}}
   if(this.tr){this.xs.push(x);this.ls.push(legal);this.as.push(a)}return a}
@@ -128,97 +142,79 @@ class NetAgent{constructor(net,sims,training){this.net=net;this.sims=sims;this.t
 class Teacher{constructor(bot,rec){this.bot=bot;this.rec=rec;this.acts=[]}
  act(o){this.rec.act(o);const a=this.bot.act(o);this.acts.push(a);return a}}
 
-class Game{constructor(a,b,ui){this.ag=[a,b];this.ui=ui||null;this.names=["You","Bot"];this.reveal=false}
- log(s,cls){this.ui&&this.ui.log(s,cls)}
- upd(){this.ui&&this.ui.render(this)}
- post(p,a){a=Math.min(a,this.stack[p]);this.stack[p]-=a;this.bet[p]+=a}
- async play(button){
-  const d=[...Array(52).keys()];for(let i=51;i>0;i--){const j=rnd(i+1);[d[i],d[j]]=[d[j],d[i]]}
-  this.hole=[[d[0],d[1]],[d[2],d[3]]];this.board=d.slice(4,9);this.nBoard=0;this.pot=0;this.reveal=false;
-  this.stack=[START,START];this.bet=[0,0];this.button=button;
-  const sb=button,bb=1-button;this.post(sb,SB);this.post(bb,BB);
-  this.log(`${this.names[sb]} posts the small blind (${SB}), ${this.names[bb]} the big blind (${BB})`);this.upd();
-  let folder=-1;
-  for(let st=0;st<4&&folder<0;st++){
-   if(st>0){this.pot+=this.bet[0]+this.bet[1];this.bet=[0,0];this.nBoard=st==1?3:st+2;
+const HN=["High card","Pair","Two pair","Three of a kind","Straight","Flush","Full house","Four of a kind","Straight flush"];
+class Game{constructor(ag,ui,names){this.ag=ag;this.N=ag.length;this.ui=ui||null;this.names=names||ag.map((_,i)=>"P"+i);this.reveal=false;this.acting=-1;this.abort=false}
+ chk(){if(this.abort)throw new Error("abort")}
+ log(s,c){this.ui&&this.ui.log(s,c)}
+ upd(){this.ui&&!this.abort&&this.ui.render(this)}
+ post(p,a){a=Math.min(a,this.stack[p]);this.stack[p]-=a;this.bet[p]+=a;this.inv[p]+=a}
+ alive(){const r=[];for(let i=0;i<this.N;i++)if(!this.folded[i])r.push(i);return r}
+ async play(button,stacks){const N=this.N,d=[...Array(52).keys()];
+  this.stack=stacks?stacks.slice():Array(N).fill(START);const start=this.stack.slice();
+  this.out=this.stack.map(x=>x<=0);this.folded=this.out.slice();this.inv=Array(N).fill(0);this.bet=Array(N).fill(0);this.last=this.out.map(o=>o?"Out":"");
+  for(let i=51;i>0;i--){const j=rnd(i+1);[d[i],d[j]]=[d[j],d[i]]}
+  this.hole=[];let k=0;for(let i=0;i<N;i++)this.hole.push(this.out[i]?[]:[d[k++],d[k++]]);
+  this.board=d.slice(k,k+5);this.nBoard=0;this.pot=0;this.reveal=false;this.acting=-1;this.button=button;
+  const A=this.out.filter(x=>!x).length,na=i=>{do{i=(i+1)%N}while(this.out[i]);return i};
+  const sb=A==2?button:na(button),bb=na(sb);this.post(sb,SB);this.post(bb,BB);this.last[sb]="SB "+SB;this.last[bb]="BB "+BB;
+  this.log(`${this.names[sb]} posts the small blind, ${this.names[bb]} the big blind`);this.upd();
+  for(let st=0;st<4&&this.alive().length>1;st++){
+   if(st>0){this.pot+=this.bet.reduce((a,b)=>a+b,0);this.bet.fill(0);this.last=this.last.map((x,i)=>this.out[i]?"Out":"");this.nBoard=st==1?3:st+2;
     this.log(`${["","Flop","Turn","River"][st]}: ${this.board.slice(0,this.nBoard).map(cardStr).join(" ")}`,"h");this.upd()}
-   folder=await this.betting(st,st==0?sb:bb,button)}
-  this.pot+=this.bet[0]+this.bet[1];this.bet=[0,0];
-  if(folder>=0){this.stack[1-folder]+=this.pot;this.log(`${this.names[folder]} folds. ${this.names[1-folder]} wins ${this.pot}.`)}
-  else{this.nBoard=5;this.reveal=true;const sv=p=>[...this.hole[p],...this.board],a=best7(sv(0)),b=best7(sv(1));
-   this.log(`Showdown: ${this.names[0]} ${this.hole[0].map(cardStr).join(" ")}, ${this.names[1]} ${this.hole[1].map(cardStr).join(" ")}`,"h");
-   if(a>b){this.stack[0]+=this.pot;this.log(`${this.names[0]} win${this.names[0]=="You"?"":"s"} ${this.pot}.`)}
-   else if(b>a){this.stack[1]+=this.pot;this.log(`${this.names[1]} wins ${this.pot}.`)}
-   else{this.stack[0]+=this.pot>>1;this.stack[1]+=this.pot-(this.pot>>1);this.log("Split pot.")}}
-  this.reveal=true;this.pot=0;this.upd();
-  return[this.stack[0]-START,this.stack[1]-START]}
- async betting(street,first,button){let p=first,toAct=2,raises=0;
-  while(toAct>0){const o=1-p,s=this.stack,b=this.bet;
-   if(s[p]>0&&!(s[o]==0&&b[p]>=b[o])){
-    const maxBet=Math.max(b[0],b[1]),toCall=Math.min(maxBet-b[p],s[p]),potNow=this.pot+b[0]+b[1];
-    let raiseTo=maxBet+Math.max(BB,Math.floor((potNow+toCall)*3/4));raiseTo=Math.min(raiseTo,b[p]+s[p],b[o]+s[o]);
-    const ob={hole:this.hole[p],board:this.board,nBoard:this.nBoard,street,pot:potNow,toCall,stack:s[p],oppStack:s[o],raises,raiseTo,isButton:p==button,canRaise:raises<4&&s[o]>0&&raiseTo>maxBet};
-    ob.equity=n=>equity(ob.hole,ob.board,ob.nBoard,n);
-    this.upd();if(this.ui&&!this.ag[p].human)await new Promise(r=>setTimeout(r,750));
-    let a=await this.ag[p].act(ob);
+   if(this.alive().filter(i=>this.stack[i]>0).length>1){
+    let first=st==0?na(bb):(button+1)%N;while(this.folded[first])first=(first+1)%N;
+    await this.betting(st,first,button)}}
+  this.pot+=this.bet.reduce((a,b)=>a+b,0);this.bet.fill(0);
+  const al=this.alive(),W=i=>this.names[i]+(i==0?" win":" wins");
+  if(al.length==1){this.stack[al[0]]+=this.pot;this.log(`${W(al[0])} ${this.pot}.`)}
+  else{this.nBoard=5;this.reveal=true;const sc={};al.forEach(i=>sc[i]=best7([...this.hole[i],...this.board]));
+   this.log("Showdown","h");al.forEach(i=>this.log(`${this.names[i]}: ${this.hole[i].map(cardStr).join(" ")}, ${HN[Math.floor(sc[i]/371293)]}`));
+   const lv=[...new Set(this.inv.filter(x=>x>0))].sort((a,b)=>a-b),pots=[];let prev=0;
+   for(const L of lv){let amt=0;for(const x of this.inv)amt+=Math.min(x,L)-Math.min(x,prev);
+    const el=al.filter(i=>this.inv[i]>=L);if(el.length)pots.push({amt,el});else if(pots.length)pots[pots.length-1].amt+=amt;prev=L}
+   pots.forEach((pt,n)=>{let m=-1,w=[];for(const i of pt.el){if(sc[i]>m){m=sc[i];w=[i]}else if(sc[i]==m)w.push(i)}
+    const sh=Math.floor(pt.amt/w.length);w.forEach((i,j)=>this.stack[i]+=sh+(j==0?pt.amt-sh*w.length:0));
+    const lab=pots.length>1?(n==0?"main pot":"side pot "+n):"the pot";
+    this.log(w.length>1?`${w.map(i=>this.names[i]).join(" and ")} split ${lab} (${pt.amt}).`:`${W(w[0])} ${lab} (${pt.amt}) with ${HN[Math.floor(m/371293)]}.`)})}
+  this.reveal=true;this.pot=0;this.acting=-1;this.upd();return this.stack.map((x,i)=>x-start[i])}
+ async betting(st,first,button){const N=this.N;let need=new Set(this.alive().filter(i=>this.stack[i]>0)),p=first,raises=0;
+  while(need.size>0&&this.alive().length>1){this.chk();
+   if(need.has(p)){need.delete(p);const b=this.bet,s=this.stack,maxBet=Math.max(...b),toCall=Math.min(maxBet-b[p],s[p]);
+    const potNow=this.pot+b.reduce((x,y)=>x+y,0),others=this.alive().filter(i=>i!=p);
+    const raiseTo=Math.min(maxBet+Math.max(BB,Math.floor((potNow+toCall)*3/4)),b[p]+s[p]);
+    const ob={hole:this.hole[p],board:this.board,nBoard:this.nBoard,street:st,pot:potNow,toCall,stack:s[p],oppStack:Math.max(...others.map(i=>s[i])),raises,raiseTo,isButton:p==button,k:others.length,
+     canRaise:raises<4&&others.some(i=>s[i]>0)&&raiseTo>maxBet};
+    ob.equity=n=>Math.pow(equity(ob.hole,ob.board,ob.nBoard,n),1+.5*(ob.k-1));
+    this.acting=p;this.upd();if(this.ui&&!this.ag[p].human)await new Promise(r=>setTimeout(r,this.folded[0]?150:650));
+    this.chk();let a=await this.ag[p].act(ob);this.chk();this.acting=-1;
     if(a==RAISE&&!ob.canRaise)a=CALL;if(a==FOLD&&toCall==0)a=CALL;
-    if(a==FOLD){this.log(`${this.names[p]} folds`);return p}
-    if(a==CALL){this.post(p,toCall);this.log(`${this.names[p]} ${toCall?"calls "+toCall:"checks"}`);toAct--}
-    else{this.post(p,raiseTo-b[p]);raises++;this.log(`${this.names[p]} raises to ${raiseTo}${s[p]==0?" (all-in)":""}`);toAct=1}
-   }else toAct--;
-   p=o}
-  return-1}}
+    if(a==FOLD){this.folded[p]=true;this.last[p]="Fold";this.log(`${this.names[p]} folds`)}
+    else if(a==CALL){this.post(p,toCall);this.last[p]=toCall?"Call "+toCall:"Check";this.log(`${this.names[p]} ${toCall?"calls "+toCall:"checks"}`)}
+    else{this.post(p,raiseTo-b[p]);raises++;this.last[p]="Raise "+raiseTo;this.log(`${this.names[p]} raises to ${raiseTo}${s[p]==0?" (all-in)":""}`);
+     need=new Set(others.filter(i=>s[i]>0))}
+    this.upd()}
+   p=(p+1)%N}}}
 
 const bots=["tight","loose","aggro"].map(RuleBot.of);
 async function train(net,hands,prog,stop){
  const tick=()=>new Promise(r=>setTimeout(r)),warm=Math.min(hands>>2,8000);let base=0,vs=0,vc=0;
  for(let h=1;h<=warm&&!stop();h++){const rec=new NetAgent(net,40,true),t=new Teacher(pick(bots),rec),opp=pick(bots);
-  await(h%2?new Game(opp,t):new Game(t,opp)).play(h%2);rec.imitate(t.acts);if(h%32==0)net.apply(.05,32);
+  await new Game(h%2?[opp,t]:[t,opp]).play(h%2);rec.imitate(t.acts);if(h%32==0)net.apply(.05,32);
   if(h%100==0){prog(h/(warm+hands),"Warm-up: copying rule bots");await tick()}}
  for(let h=1;h<=hands&&!stop();h++){const a=new NetAgent(net,40,true),self=Math.random()<.25,seat=rnd(2);
-  const b=self?new NetAgent(net,40,true):pick(bots),g=seat==0?new Game(a,b):new Game(b,a),res=await g.play(h%2);
+  const b=self?new NetAgent(net,40,true):pick(bots),g=new Game(seat==0?[a,b]:[b,a]),res=await g.play(h%2);
   const cl=v=>Math.max(-5,Math.min(5,v/100)),r=cl(res[seat]);a.finish(r-base);
   if(self)b.finish(cl(res[1-seat])-base);else{vs+=res[seat]/BB;vc++}
   base=.99*base+.01*r;if(h%64==0)net.apply(.003,64);
   if(h%200==0){prog((warm+h)/(warm+hands),`Hand ${h} of ${hands}. Result against rule bots: ${(vs/Math.max(1,vc)).toFixed(2)} big blinds per hand`);vs=vc=0;await tick()}}}
 //ENGINE_END
 
-const PRE=null;
+const PRE=[[-0.7,-0.02,-0.14,0.49,-0.4,-0.09,0.1,0.56,0.17,0.04,0.26,-0.49,0.09,-0.24,-0.11,-0.17,-0.14,0.02,-0.49,-0.14,-0.18,0.4,-0.6,-0.13,0.44,0.47,0.53,-0.42,0.05,-0.07,0.31,-0.25,0.57,-0.04,0.3,0.37,-0.02,0.25,0.19,-0.03,0.2,0.81,0.07,-0.19,-0.73,0.16,0.54,-0.13,0.3,-0.1,0.29,-0.25,-0.46,-0.35,-0.08,-1.56,-0.43,0.28,0.37,0.52,0.07,0.36,0.04,0.17,-0.16,0,-1.4,-0.02,-0.1,0.46,0.5,-0.61,0.02,-0.27,0.33,0.11,-0.13,0.92,0.04,0.13,-0.56,0.09,-0.2,0.18,0.02,-0.08,0.09,-0.33,-0.27,-0.41,0.81,0.2,-0.31,0.4,0.01,-0.58,0,0.14,0.26,0.36,-0.19,-0.15,-0.32,-0.49,0.52,-0.12,-0.22,0.45,0.14,0.35,-0.17,-0.11,-0.4,0.36,0.17,0.15,0.26,-0.25,0.51,-0.51,-0.18,-0.34,-0.46,-0.19,0.21,0.26,0.11,-0.53,0.25,-0.37,0.19,0.11,-1.01,-0.04,-0.33,0.25,0.15,0.52,0.34,0.12,0.04,0.04,-0.17,0.35,-0.06,0.07,-0.04,0.03,0.54,0.2,0.04,0.26,-0.44,-0.22,0.37,-0.6,0.74,-0.11,0.27,-0.23,0.35,0.26,0.68,-0.23,0.5,-0.67,0.17,-0.06,-0.22,0.14,0.21,-0.21,0.19,-0.18,0.18,0.11],[0.06,-0.13,-0.16,0,-0.03,0.18,0.14,-0.17,-0.01,0.02,-0.05,-0.03,0.05,0.05,-0.02,0.2],[0.33,-0.28,1.1,0.1,0.55,0.48,0.8,-0.73,-0.1,-0.53,0.72,0.49,0.14,-0.58,0.06,0.5,0.06,-0.44,-0.14,-0.04,-0.31,0.48,0.03,-0.86,0.69,0.07,-0.29,0.22,-0.06,0.34,-0.48,0.49,-0.72,-0.23,-0.16,-0.33,-0.27,-1.12,-0.98,0.5,-0.22,0.32,-0.13,-0.1,-1.09,0.37,0.36,-0.52],[-0.13,0.15,-0.02]];
 const $=id=>document.getElementById(id);
-let net=null,total=0,handNo=0,busy=false,pending=null,stopFlag=false,training=false;
+let net=null,busy=false,pending=null,stopFlag=false,training=false,prevBet=[],S=null,cur=null;
 try{const w=JSON.parse(localStorage.getItem("pokernet")||"null");if(w)net=new Net(w)}catch(e){}
 if(!net&&PRE)net=new Net(PRE);
-const cardEl=(c,back)=>{const d=document.createElement("div");
- if(back){d.className="card back";return d}
- d.className="card"+((c/13|0)==1||(c/13|0)==2?" r":"");d.innerHTML=`<span>${RANKS[c%13]=="T"?"10":RANKS[c%13]}</span><small>${SUITS[c/13|0]}</small>`;return d};
-const fill=(id,arr)=>{const e=$(id);e.replaceChildren(...arr)};
-const ui={log(s,c){const d=document.createElement("div");d.textContent=s;if(c)d.className=c;$("log").appendChild(d);$("log").scrollTop=1e6},
- render(g){fill("ycards",g.hole[0].map(c=>cardEl(c)));
-  fill("ocards",g.hole[1].map(c=>cardEl(c,!g.reveal)));
-  fill("board",g.board.slice(0,g.nBoard).map(c=>cardEl(c)));
-  $("pot").textContent="Pot "+(g.pot+g.bet[0]+g.bet[1]);
-  $("ybet").textContent=g.bet[0]?"Bet "+g.bet[0]:"";$("obet").textContent=g.bet[1]?"Bet "+g.bet[1]:"";
-  $("yname").textContent=`You, stack ${g.stack[0]}${g.button==0?" (dealer)":""}`;$("oname").textContent=`${g.names[1]}, stack ${g.stack[1]}${g.button==1?" (dealer)":""}`}};
-const human={human:true,act(o){return new Promise(res=>{pending=res;
-  $("bf").disabled=o.toCall==0;$("bc").disabled=false;$("bc").textContent=o.toCall?"Call "+o.toCall:"Check";
-  $("br").disabled=!o.canRaise;$("br").textContent=o.canRaise?"Raise to "+o.raiseTo:"Raise"})}};
-const choose=a=>{if(!pending)return;const r=pending;pending=null;["bf","bc","br"].forEach(i=>$(i).disabled=true);r(a)};
-$("bf").onclick=()=>choose(FOLD);$("bc").onclick=()=>choose(CALL);$("br").onclick=()=>choose(RAISE);
-function makeBot(){const v=$("opp").value;if(v=="net")return net?new NetAgent(net,150,false):null;return RuleBot.of(v)}
-$("next").onclick=async()=>{if(busy||training)return;const bot=makeBot();
- if(!bot){ui.log("No trained network yet. Open “Train the neural network” below, or pick a rule bot.");return}
- busy=true;$("next").disabled=true;handNo++;$("log").textContent="";ui.log(`Hand ${handNo}`,"h");
- const g=new Game(human,bot,ui);g.names=["You",$("opp").selectedOptions[0].text];
- const res=await g.play(handNo%2);total+=res[0];
- ui.log(`Result: ${res[0]>=0?"+":""}${res[0]} chips`,"h");
- $("total").textContent=`Session: ${total>=0?"+":""}${total} chips (${(total/BB).toFixed(1)} big blinds)`;
- busy=false;$("next").disabled=false;$("next").textContent="Deal next hand"};
-$("tr").onclick=async()=>{if(training||busy)return;training=true;stopFlag=false;$("tr").disabled=true;$("st").disabled=false;
- if(!net)net=new Net();
- await train(net,Math.max(1000,+$("nh").value||20000),(p,t)=>{$("pg").value=p;$("ts").textContent=t},()=>stopFlag);
- try{localStorage.setItem("pokernet",JSON.stringify(net.dump()))}catch(e){}
- $("ts").textContent="Done. The network is saved on this device.";training=false;$("tr").disabled=false;$("st").disabled=true};
-$("st").onclick=()=>{stopFlag=true};
-$("rs").onclick=()=>{if(training)return;net=PRE?new Net(PRE):null;try{localStorage.removeItem("pokernet")}catch(e){}$("ts").textContent="Network reset."};
-if(!net)$("log").textContent="Pick a rule bot and press Deal, or train the neural network first.";
-</script></body></html>
+const NAMES="Nova Tex Lola Axel Nora Max Ivy Otto Zed Mia Kai Rae Leo Uma Jax Ada Finn Gus Hana Ike Joy Cy".split(" "),TN={net:"neural net",tight:"tight",loose:"loose",aggro:"aggro"};
+const DEN=[[1000,"#d9a521"],[500,"#6a3fa0"],[100,"#222"],[25,"#2e8b57"],[10,"#2a62c9"],[5,"#c43a31"]];
+const chips=amt=>{let h="";for(const[v,c]of DEN){const n=Math.floor(amt/v);amt-=n*v;if(n)h+=`<div class="stk">${`<i class="chip" style="--c:${c}"></i>`.repeat(Math.min(n,6))}</div>`}return h};
+const cardH=(c,cl)=>`<div class="card ${cl}${[1,2].includes(c/13|0)?" r":""}"><span>${RANKS[c%13]=="T"?"10":RANKS[c%13]}</span><small>${SUITS[c/13|0]}</smal
